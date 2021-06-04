@@ -1,0 +1,14 @@
+   value_kind :                0
+  value_level :                1
+value_address :                0
+   value_type :          integer
+   value_name :                k
+value_process :             main
+
+   value_kind :                0
+  value_level :                1
+value_address :                1
+   value_type :          integer
+   value_name :          funtion
+value_process :             main
+

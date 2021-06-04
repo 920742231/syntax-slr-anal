@@ -1,0 +1,284 @@
+0   :   S -> S'                         <程序>→<分程序>
+1   :   S' -> begin A;H end             <分程序>→begin <说明语句表>；<执行语句表> end
+2   :   A -> B
+3   :   A -> A;B                        <说明语句表>→<说明语句>│<说明语句表> ；<说明语句>
+4   :   B -> C
+5   :   B -> E                          <说明语句>→<变量说明>│<函数说明>
+6   :   C -> integer D                  <变量说明>→integer <变量>
+7   :   D -> a                          <变量>→<标识符>
+        a :                             <标识符>→<字母>│<标识符><字母>│ <标识符><数字>
+                                        <字母>→a│b│c│d│e│f│g│h│i│j│k│l│m│n│o │p│q │r│s│t│u│v│w│x│y│z
+                                        <数字>→0│1│2│3│4│5│6│7│8│9
+8   :   E -> integer function a (F);G   <函数说明>→integer function <标识符>（<参数>）；<函数体>
+9   :   F -> D                          <参数>→<变量>
+10  :   G -> begin A;H end              <函数体>→begin <说明语句表>；<执行语句表> end
+11  :   H -> I 
+12  :   H -> H;I                        <执行语句表>→<执行语句>│<执行语句表>；<执行语句>
+13  :   I -> J
+14  :   I -> K 
+15  :   I -> L
+16  :   I -> M                          <执行语句>→<读语句>│<写语句>│<赋值语句>│<条件语句>
+17  :   J -> read(D)                    <读语句>→read(<变量>)
+18  :   K -> write(D)                   <写语句>→write(<变量>)
+19  :   L -> D := N                     <赋值语句>→<变量>:=<算术表达式>
+20  :   N -> N - O
+21  :   N -> O                          <算术表达式>→<算术表达式>-<项>│<项>
+22  :   O -> O * P
+23  :   O -> P                          <项>→<项>*<因子>│<因子>
+24  :   P -> D
+25  :   P -> b
+26  :   P -> T                          <因子>→<变量>│<常数>│<函数调用>
+        b                               <常数>→<无符号整数>
+                                        <无符号整数>→<数字>│<无符号整数><数字>
+27  :   M -> if Q then I else I         <条件语句>→if<条件表达式>then<执行语句>else <执行语句>
+28  :   Q -> N R N                      <条件表达式>→<算术表达式><关系运算符><算术表达式>
+29  :   R -> <
+30  :   R -> <=
+31  :   R -> >
+32  :   R -> >=
+33  :   R -> =
+34  :   R -> <>                         <关系运算符> →<│<=│>│>=│=│<>
+35  :   T -> a(N)                       <函数调用> -> <标识符>(<算术表达式>)
+
+I0 = {S -> .S',S' -> .begin A;H end}
+goto(I0,S') = {S -> S'.} = I1
+goto(I0,begin) = {S' -> begin.A;H end,A -> .A;B,A -> .B,B -> .C,B -> .E,
+    C -> .integer D,E -> .integer function id(F);G} = I2
+goto(I2,A) = {S' -> begin A.;H end,A -> A.;B} = I3
+goto(I2,B) = {A -> B.} = I4
+goto(I2,C) = {B -> C.} = I5
+goto(I2,E) = {B -> .E} = I6
+goto(I2,integer) = {C -> integer.D,D -> .id,E -> integer.function id(F);G} = I7
+goto(I3,;) = {S' -> begin A;.H end,A -> A;.B,H -> .H;I,H -> .I,I -> .J,I -> .K,I -> .L,I -> .M,
+    J -> .read(D),K -> .write(D),L -> .D := N,M -> .if Q then I else I,D -> .id,
+    B -> .C,B -> .E,C -> .integer D,E -> .integer function id(F);G} = I8
+goto(I7,D) = {C -> integer D.} = I9
+goto(I7,id) = {D -> id.} = I10
+goto(I7,function) = {E -> integer function.id(F);G} = I11
+goto(I8,H) = {S' -> begin A;H.end,H -> H.;I} = I12
+goto(I8,B) = {A -> A;B.} = I13
+goto(I8,I) = {H -> I.} = I14
+goto(I8,J) = {I -> J.} = I15
+goto(I8,K) = {I -> K.} = I16
+goto(I8,L) = {I -> L.} = I17
+goto(I8,M) = {I -> M.} = I18
+goto(I8,read) = {J -> read.(D)} = I19
+goto(I8,write) = {K -> write.(D)} = I20
+goto(I8,D) = {L -> D.:= N} = I21 
+goto(I8,if) = {M -> if.Q then I else I,
+    Q -> .NRN,N -> .N-O,N -> .O,
+    O -> .O*P,O -> .P,
+    P -> .D,P -> .int,P -> .T,
+    D -> .id,T -> .id(N)} = I22 
+goto(I8,id) = I10
+goto(I8,C) = I5 
+goto(I8,E) = I6 
+goto(I8,integer) = I7 
+goto(I11,id) = {E -> integer function id.(F);G} = I23
+goto(I12,end) = {S' -> begin A;H end.} = I24
+goto(I12,;) = {H -> H;.I,
+    I -> .J,I -> .K,I -> .L,I -> .M
+    J -> .read(D),K -> .write(D),L -> .D := N,M -> .if Q then I else I,
+    D -> .id} = I25
+goto(I19,() = {J -> read(.D),D -> .id} = I26
+goto(I20,() = {K -> write(.D),D -> .id} = I27
+goto(I21,:=) = {L -> D := .N,N -> .N-O,N -> .O,O -> .O*P,O -> .P,
+    P -> .D,P -> int,P -> .T,
+    D -> .id,T -> .id(N)} = I28
+goto(I22,Q) = {M -> if Q.then I else I} = I29
+goto(I22,N) = {Q -> N.RN,N -> N.-O,
+    R -> .<,R -> .<=,R -> .>,R -> .>=,R -> .=,R -> .<>} = I30
+goto(I22,O) = {N -> O.,O -> O.*P} = I31
+goto(I22,P) = {O -> P.} = I32
+goto(I22,D) = {P -> D.} = I33
+goto(I22,int) = {P -> int.} = I34
+goto(I22,T) = {P -> T.} = I35
+goto(I22,id) = {D -> id.,T -> id.(N)} = I36
+goto(I23,() = {E -> integer function id(.F);G,F -> .D,D -> .id} = I37
+goto(I25,I) = {H -> H;I.} = I38
+goto(I25,J) = I15
+goto(I25,K) = I16
+goto(I25,L) = I17
+goto(I25,M) = I18
+goto(I25,read) = I19
+goto(I25,write) = I20
+goto(I25,D) = I21
+goto(I25,if) = I22
+goto(I25,id) = I10
+goto(I26,D) = {J -> read(D.)} = I39
+goto(I26,id) = I10
+goto(I27,D) = {K -> write(D.)} = I40
+goto(I27,id) = I10
+goto(I28,N) = {L -> D := N.,N -> N.-O} = I41
+goto(I28,O) = {N -> O.,O -> O.*P} = I31
+goto(I28,P) = I32
+goto(I28,D) = I33
+goto(I28,int) = I34
+goto(I28,T) = I35
+goto(I28,id) = I36
+goto(I29,then) = {M -> if Q then.I else I,I -> .J,I -> .K,I -> .L,I -> .M,
+    J -> .read(D),K -> .write(D),L -> .D:=N,M->.if Q then I else I,
+    D -> .id} = I42
+goto(I30,R) = {Q -> NR.N,N -> .N-O,N -> .O,O -> .O*P,O -> .P,
+    P -> .D,P -> .int,P -> .T,
+    D -> .id,T -> .id(N)} = I43
+goto(I30,-) = {N -> N-.O,O -> .O*P,O -> .P,
+    P -> .D,P -> .int,P -> .T
+    D -> .id,T -> .id(N)} = I44
+goto(I30,<) = {R -> <.} = I45
+goto(I30,<=) = {R -> <=.} = I46
+goto(I30,>) = {R -> >.} = I47
+goto(I30,>=) = {R -> >=.} = I48
+goto(I30,=) = {R -> =.} = I49
+goto(I30,<>) = {R -> <>.} = I50
+goto(I31,*) = {O -> O*.P,P -> .D,P -> .int,P -> .T,
+    D -> .id,T -> .id(N)} = I51
+goto(I36,() = {T -> id(.N),N -> .N-O,N -> .O,O -> .O*P,O -> P,
+    P -> .D,P -> int,P -> T,
+    D -> .id,T -> .id(N)} = I52
+goto(I37,F) = {E -> integer function id(F.);G} = I53
+goto(I37,D) = {F -> D.} = I54
+goto(I37,id) = I10
+goto(I39,)) = {J -> read(D).} = I55
+goto(I40,)) = {K -> write(D).} = I56
+goto(I41,-) = I44
+goto(I42,I) = {M -> if Q then I.else I} = I57
+goto(I42,J) = I15
+goto(I42,K) = I16
+goto(I42,L) = I17
+goto(I42,M) = I18
+goto(I42,read) = I19
+goto(I42,write) = I20
+goto(I42,D) = I21
+goto(I42,if) = I22
+goto(I42,id) = I10
+goto(I43,N) = {Q -> NRN.,N -> N.-O} = I58
+goto(I43,O) = I31
+goto(I43,P) = I32
+goto(I43,D) = I33
+goto(I43,int) = I34
+goto(I43,T) = I35
+goto(I43,id) = I36
+goto(I44,O) = {N -> N-O.,O -> O.*P,} = I59
+goto(I44,P) = I32
+goto(I44,D) = I33
+goto(I44,int) = I34
+goto(I44,T) = I35
+goto(I44,id) = I36
+goto(I51,P) = {O -> O*P.} = I60
+goto(I51,D) = I33
+goto(I51,int) = I34
+goto(I51,T) = I35
+goto(I51,id) = I36
+goto(I52,N) = {T -> id(N.),N -> N.-O} = I61
+goto(I52,O) = {N -> O.,O -> O.*P} = I31
+goto(I52,P) = I32
+goto(I52,D) = I33
+goto(I52,int) = I34
+goto(I52,T) = I35
+goto(I52,id) = I36
+goto(I53,)) = {E -> integer function id(F).;G} = I62
+goto(I57,else) = {M -> if Q then I else.I,I -> .J,I -> .K,I -> .L,I -> .M,
+    J -> .read(D),K -> .write(D),L -> .D:=N,M->.if Q then I else I,
+    D -> .id} = I63
+goto(I58,-) = {N -> N-.O,O -> .O*P,O -> .P,
+    P -> .D,P -> .int,P -> .T,
+    D -> .id,T -> .id(N)} = I44
+goto(I59,*) = I51
+goto(I61,)) = {T -> id(N).} = I64
+goto(I61,-) = I44
+goto(I62,;) = {E -> integer function if(F);.G,G -> .begin A;H end,} = I65
+goto(I63,I) = {M -> if Q then I else I.} = I66
+goto(I63,J) = I15
+goto(I63,K) = I16
+goto(I63,L) = I17
+goto(I63,M) = I18
+goto(I63,read) = I19
+goto(I63,write) = I20
+goto(I63,D) = I21
+goto(I63,if) = I22
+goto(I63,id) = I10
+goto(I65,G) = {E -> integer function id(F);G.} = I67
+goto(I65,begin) = {G -> begin.A;H end,A -> .A;B,A -> .B,B -> .C,B -> .E,
+    C -> .integer D,E -> .integer function id(F);G} = I68
+goto(I68,A) = {G -> begin A.;H end,A -> A.;B} = I69
+goto(I68,B) = {A -> B.} = I4
+goto(I68,C) = {B -> C.} = I5
+goto(I68,E) = {B -> .E} = I6
+goto(I68,integer) = {C -> integer.D,D -> .id,E -> integer.function id(F);G} = I7
+goto(I69,;) = {G -> begin A;.H end,A -> A;.B,H -> .H;I,H -> .I,I -> .J,I -> .K,I -> .L,I -> .M,
+    J -> .read(D),K -> .write(D),L -> .D := N,M -> .if Q then I else I,D -> .id,
+    B -> .C,B -> .E,C -> .integer D,E -> .integer function id(F);G} = I70
+goto(I70,H) = {G -> begin A;H.end,H -> H.;I} = I71
+goto(I70,B) = {A -> A;B.} = I13
+goto(I70,I) = {H -> I.} = I14
+goto(I70,J) = {I -> J.} = I15
+goto(I70,K) = {I -> K.} = I16
+goto(I70,L) = {I -> L.} = I17
+goto(I70,M) = {I -> M.} = I18
+goto(I70,read) = {J -> read.(D)} = I19
+goto(I70,write) = {K -> write.(D)} = I20
+goto(I70,D) = {L -> D.:= N} = I21 
+goto(I70,if) = {M -> if.Q then I else I,
+    Q -> .NRN,N -> .N-O,N -> .O,
+    O -> .O*P,O -> .P,
+    P -> .D,P -> .int,P -> .T,
+    D -> .id,T -> .id(N)} = I22 
+goto(I70,id) = I10
+goto(I70,C) = I5 
+goto(I70,E) = I6 
+goto(I70,integer) = I7 
+goto(71,end) = {G -> begin A;H end.} = I72
+goto(I71,;) = I25
+
+
+
+
+
+
+
+
+symble:
+S
+S'
+A 
+B 
+C 
+D 
+E 
+F 
+G 
+H 
+I 
+J
+K
+L
+M
+N
+O
+P 
+Q
+R 
+T 
+      INT = 3,        //integer value
+      EQ = 5,         //=
+      LE = 7,         //<=
+      NE = 9,         //<>
+      LT = 11,        //<
+      GT,             //>     12
+      GE,             //>=    13
+      SUB,            //-     14
+      MUL,            //*     15
+      ASSIGN,         //:=    16
+      LPAR,           //(     17
+      RPAR,           //)     18
+      SEM,            //;     19
+      BEGIN,          //begin 20
+      END,            //end   21
+      INTEGER,        //integer22
+      IF,             //if     23
+      THEN,           //then   24
+      ELSE,           //else   25
+      FUNCTION,       //function26
+      READ,           //read    27
+      WRITE,          //write   28 
