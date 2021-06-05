@@ -76,6 +76,7 @@ void SLRTable::init_action() {
     action[23][LPAR] = 37;
     action[25][READ] = 19;
     action[25][WRITE] = 20;
+    action[25][INTEGER] = 7;
     action[25][IF] = 22;
     action[25][ID] = 10;
     action[26][ID] = 10;
@@ -179,6 +180,8 @@ void SLRTable::init_go() {
         go[20][i] = 2 + 150;    //write m) 
         go[3][i] = 3 + 150;
     }
+    //非法声明
+    go[25][A] = go[25][C] = 4 + 150;
     //移进项目
     go[0][S_] = 1;
     go[2][A] = 3;

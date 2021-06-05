@@ -77,11 +77,13 @@ void SyntaxAnal::Shift(const pair<string,int> & dyd) {
     case 23:        //function defined "function a"
         AddProcess(dyd.first);
         break;
-    case 24:
-    case 72:
+    case 24:        //end
+    case 72:        //end
         --level;
         //回写过程最后一个变量的地址
-        process_map[current_proc].last_value_address = process_map.size() - 1;
+        if(process_map.find(current_proc) != process_map.end()) 
+            process_map[current_proc].last_value_address = value_map.size() - 1;
+        current_proc = string {"main"};
         if(!undefined_parameters.empty()) {
             //函数形参未定义
             Error(undeclared);
@@ -323,15 +325,26 @@ void SyntaxAnal::Error(int description) {
         break;
     case 151:
         cout << "***" << lines << " : read " << this_dyd.first << " lack of \'(\'\n";
+        current_st = state_stack.top();
+        state_stack.pop();
         Advance(make_pair(string{"("},SLRTable::LPAR));
+        Advance(this_dyd);
         break;
     case 152:
         cout << "***" << lines << " : write " << this_dyd.first << " lack of \'(\'\n";
+        current_st = state_stack.top();
+        state_stack.pop();
         Advance(make_pair(string{"("},SLRTable::LPAR));
+        Advance(this_dyd);
         break;
     case 153:
-        cout << "***" << lines << " fatal error\n";
+        cout << "***" << lines << " fatal error.\n";
         wrong = true;
+        break;
+    case 154:
+        cout << "***" << lines << " illegal declaration.\n";
+        current_st = state_stack.top();
+        state_stack.pop();
         break;
     default:
         break;
